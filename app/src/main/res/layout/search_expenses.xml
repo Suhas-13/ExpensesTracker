@@ -13,11 +13,6 @@
     android:background="#FFFFFF">
 
 
-    <com.google.android.material.slider.RangeSlider
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:valueFrom="0.0"
-        android:valueTo="100.0" />
 
     <TextView
         android:id="@+id/expenseText"
@@ -35,41 +30,48 @@
         android:id="@+id/nameField"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
         android:layout_marginTop="56dp"
-        android:layout_marginEnd="25dp"
         android:ems="10"
         android:hint="Name"
         android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.122"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/expenseText" />
 
     <EditText
-        android:id="@+id/priceField"
+        android:id="@+id/priceMaxField"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="19dp"
+        android:layout_marginEnd="15dp"
         android:ems="10"
-        android:hint="Price"
+        android:hint="Price Maximum"
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.827"
+        app:layout_constraintStart_toEndOf="@+id/priceMinField"
+        app:layout_constraintTop_toBottomOf="@+id/dateField" />
+
+    <EditText
+        android:id="@+id/priceMinField"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="19dp"
+        android:ems="10"
+        android:hint="Price Minimum"
+        android:inputType="number"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/expenseText" />
+        app:layout_constraintTop_toBottomOf="@+id/currencyField" />
 
     <EditText
         android:id="@+id/currencyField"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
         android:layout_marginTop="19dp"
-        android:layout_marginEnd="25dp"
         android:ems="10"
         android:hint="Currency"
         android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.122"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nameField" />
 
@@ -77,67 +79,57 @@
         android:id="@+id/categoryField"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="19dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="15dp"
         android:ems="10"
         android:hint="Category"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.827"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/priceField" />
-
-    <EditText
-        android:id="@+id/notesField"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="19dp"
-        android:layout_marginEnd="25dp"
-        android:ems="10"
-        android:hint="Notes"
-        android:inputType="textLongMessage|textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.122"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currencyField" />
+        app:layout_constraintStart_toEndOf="@+id/nameField"
+        app:layout_constraintTop_toBottomOf="@+id/expenseText" />
 
     <EditText
         android:id="@+id/dateField"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
         android:layout_marginTop="19dp"
+        android:layout_marginEnd="15dp"
         android:ems="10"
         android:hint="Date"
         android:inputType="date"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.827"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/currencyField"
         app:layout_constraintTop_toBottomOf="@+id/categoryField" />
 
     <EditText
         android:id="@+id/locationField"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="19dp"
+        android:layout_marginStart="145dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginEnd="164dp"
         android:ems="10"
         android:hint="Location"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.417"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/notesField" />
+        app:layout_constraintTop_toBottomOf="@+id/priceMaxField" />
 
     <Button
-        android:id="@+id/addExpenseButton"
+        android:id="@+id/searchExpenseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:text="Add Expense"
+        android:layout_marginStart="120dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="147dp"
+        android:layout_marginBottom="253dp"
+        android:text="Search Expense"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.452"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/locationField" />
+        app:layout_constraintTop_toBottomOf="@+id/locationField"
+        app:layout_constraintVertical_bias="0.0" />
 
     <ImageView
         android:id="@+id/closePopup"

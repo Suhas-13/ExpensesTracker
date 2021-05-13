@@ -5,40 +5,40 @@
     android:orientation="horizontal">
 
     <TextView
-        android:layout_width="0dp"
+        android:layout_width="25dp"
         android:layout_height="wrap_content"
         android:id="@+id/expense_name"
         android:layout_weight="0.25"
         android:gravity="center"/>
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_width="25dp"
+        android:layout_height="wrap_content"
         android:id="@+id/expense_category"
         android:layout_weight="0.25"
         android:gravity="center"/>
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_width="25dp"
+        android:layout_height="wrap_content"
         android:id="@+id/expense_price"
         android:layout_weight="0.25"
         android:gravity="center"/>
 
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_width="25dp"
+        android:layout_height="wrap_content"
         android:id="@+id/expense_currency"
         android:layout_weight="0.25"
         android:gravity="center"/>
 
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_width="25dp"
+        android:layout_height="wrap_content"
         android:id="@+id/expense_date"
         android:layout_weight="0.25"
         android:gravity="center"/>
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_width="25dp"
+        android:layout_height="wrap_content"
         android:id="@+id/expense_location"
         android:layout_weight="0.25"
         android:gravity="center"/>

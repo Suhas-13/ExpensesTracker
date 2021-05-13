@@ -1,6 +1,8 @@
 package com.example.expensetracker;
 
 
+import android.util.Log;
+
 import androidx.recyclerview.widget.SortedList;
 
 import java.time.LocalDate;
@@ -25,6 +27,7 @@ public class ExpenseSheet {
     public HashMap<String, ArrayList<Expense> > categoryMap;
     public HashMap<String, ArrayList<Expense> > locationMap;
     public HashMap<LocalDate, ArrayList<Expense> > dateMap;
+    public HashMap<String, ArrayList<Expense> > currencyMap;
     public TreeMap<Double, ArrayList<Expense> > priceMap;
     public TreeSet<Expense> sortedExpenses;
 
@@ -32,6 +35,7 @@ public class ExpenseSheet {
         this.nameMap = new HashMap<String, ArrayList<Expense> >();
         this.categoryMap = new HashMap<String, ArrayList<Expense> >();
         this.locationMap = new HashMap<String, ArrayList<Expense> >();
+        this.currencyMap = new HashMap<String, ArrayList<Expense> >();
         this.dateMap = new HashMap<LocalDate, ArrayList<Expense> >();
         this.priceMap = new TreeMap<Double, ArrayList<Expense> >();
         this.sortedExpenses = new TreeSet<Expense>();
@@ -107,6 +111,10 @@ public class ExpenseSheet {
         else if (characteristic.equals("priceRange")) {
             expenseList = searchByRange(partialExpense.getPriceRange());
         }
+        else if (characteristic.equals("currency")) {
+            queryList = currencyMap;
+            expenseList = queryList.get(partialExpense.getCharacteristic(characteristic));
+        }
         else {
             return;
         }
@@ -132,10 +140,10 @@ public class ExpenseSheet {
         }
         return output;
     }
-    public ArrayList<Expense> multiSearch(Expense partialExpense) {
+    public TreeSet<Expense> multiSearch(Expense partialExpense) {
         int numCriteria = 0;
         HashMap<Expense, Integer> searchList = new HashMap<Expense, Integer>();
-        if (partialExpense.getName() != null) {
+        if (partialExpense.getName() != null && !partialExpense.getName().isEmpty()) {
             numCriteria++;
             searchHelper(partialExpense, searchList, "name");
         }
@@ -143,11 +151,15 @@ public class ExpenseSheet {
             numCriteria++;
             searchHelper(partialExpense, searchList, "date");
         }
-        if (partialExpense.getLocation() != null) {
+        if (partialExpense.getLocation() != null && !partialExpense.getLocation().isEmpty()) {
             numCriteria++;
             searchHelper(partialExpense, searchList, "location");
         }
-        if (partialExpense.getCategory() != null) {
+        if (partialExpense.getCurrency() != null && !partialExpense.getCurrency().isEmpty()) {
+            numCriteria++;
+            searchHelper(partialExpense, searchList, "currency");
+        }
+        if (partialExpense.getCategory() != null && !partialExpense.getCategory().isEmpty()) {
             numCriteria++;
             searchHelper(partialExpense, searchList, "category");
         }
@@ -155,7 +167,8 @@ public class ExpenseSheet {
             numCriteria++;
             searchHelper(partialExpense, searchList, "priceRange");
         }
-        ArrayList<Expense> output = new ArrayList<Expense>();
+        Log.d("TEST","Num criteria" + numCriteria);
+        TreeSet<Expense> output = new TreeSet<Expense>();
         for (Expense expense: searchList.keySet()) {
             if (searchList.get(expense) == numCriteria) {
                 output.add(expense);

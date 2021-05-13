@@ -148,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Please select an expense to delete first.", Toast.LENGTH_LONG).show();
         }
         else {
-            Log.d("TEST", String.valueOf(selectedPosition));
             Expense expense = (Expense) adapter.getItem(selectedPosition);
             expenses.removeExpense(expense);
             adapter.notifyDataSetChanged();
@@ -245,7 +244,15 @@ public class MainActivity extends AppCompatActivity {
         LayoutInflater inflater = (LayoutInflater)
                 getSystemService(LAYOUT_INFLATER_SERVICE);
         final View popupView = inflater.inflate(R.layout.search_expenses, null);
-
+        final Button searchButton = findViewById(R.id.searchButton);
+        if (adapter.isShowSearchResults()) {
+            adapter.setShowSearchResults(false);
+            adapter.setSearchResults(null);
+            searchButton.setText("Search Records");
+            adapter.notifyDataSetChanged();
+            return;
+        }
+        searchButton.setText("Exit Search");
         // create the popup window
         int width = currentActivity.getWindow().getDecorView().getWidth();
         int height = currentActivity.getWindow().getDecorView().getHeight();
@@ -255,16 +262,21 @@ public class MainActivity extends AppCompatActivity {
         final ImageView closePopup =  popupView.findViewById(R.id.closePopup);
         final EditText locationText =  popupView.findViewById(R.id.locationField);
         final EditText nameText =  popupView.findViewById(R.id.nameField);
-        final EditText priceText =  popupView.findViewById(R.id.priceField);
+        final EditText priceMin =  popupView.findViewById(R.id.priceMinField);
+        final EditText priceMax =  popupView.findViewById(R.id.priceMaxField);
         final EditText currencyText =  popupView.findViewById(R.id.currencyField);
         final EditText categoryText =  popupView.findViewById(R.id.categoryField);
         final EditText dateText =  popupView.findViewById(R.id.dateField);
-        final EditText notesText =  popupView.findViewById(R.id.notesField);
-        final Button submit =  popupView.findViewById(R.id.addExpenseButton);
+        final Button submit =  popupView.findViewById(R.id.searchExpenseButton);
+
         closePopup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                adapter.setShowSearchResults(false);
+                adapter.setSearchResults(null);
+                adapter.notifyDataSetChanged();
                 popupWindow.dismiss();
+                searchButton.setText("Search Records");
             }
         });
 
@@ -273,19 +285,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    String name = nameText.getText().toString();
-                    String location = locationText.getText().toString();
-                    double price = Double.parseDouble(priceText.getText().toString());
-                    String currency = currencyText.getText().toString();
-                    String category = categoryText.getText().toString();
-                    String date = dateText.getText().toString();
-                    String notes = notesText.getText().toString();
-                    Expense newExpense = new Expense(name, date, price, location, currency, category, notes);
-                    expenses.addExpense(newExpense);
-                    adapter.notifyDataSetChanged();
-                    saveData();
-                    popupWindow.dismiss();
-
+                        String name = nameText.getText().toString();
+                        String location = locationText.getText().toString();
+                        Range rangeObject = null;
+                        if (!priceMin.getText().toString().isEmpty() && !priceMax.getText().toString().isEmpty()) {
+                            double minPrice = Double.parseDouble(priceMin.getText().toString());
+                            double maxPrice = Double.parseDouble(priceMax.getText().toString());
+                            rangeObject = new Range(minPrice, maxPrice);
+                        }
+                        String currency = currencyText.getText().toString();
+                        String category = categoryText.getText().toString();
+                        String date = dateText.getText().toString();
+                        Expense newExpense = new Expense();
+                        newExpense.setName(name);
+                        newExpense.setLocation(location);
+                        newExpense.setCurrency(currency);
+                        newExpense.setCategory(category);
+                        newExpense.setDate(date);
+                        newExpense.setPriceRange(rangeObject);
+                        TreeSet<Expense> expenseList = expenses.multiSearch(newExpense);
+                        Log.d("TEST", String.valueOf(expenseList));
+                        adapter.setSearchResults(expenseList);
+                        adapter.setShowSearchResults(true);
+                        adapter.notifyDataSetChanged();
+                        popupWindow.dismiss();
                 }
                 catch (Exception e) {
                     Log.d("ERROR", String.valueOf(e));

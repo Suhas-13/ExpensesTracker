@@ -45,13 +45,21 @@ public class Expense implements Comparable<Expense> {
         else if (characteristic.equals("category")) {
             return this.category;
         }
+        else if (characteristic.equals("currency")) {
+            return this.currency;
+        }
         return null;
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Expense(String name, String date, double price, String location, String currency, String category, String notes) throws ParseException {
         this.name = name;
         this.price = price;
-        this.date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        if (!date.isEmpty()) {
+            this.date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        }
+        else {
+            this.date = null;
+        }
         this.location = location;
         this.category = category;
         this.notes = notes;
@@ -166,7 +174,19 @@ public class Expense implements Comparable<Expense> {
         this.category = category;
     }
 
+    /**
+     * @param date the date to set
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void setDate(String date) {
+        if (!date.isEmpty()) {
+            this.date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy"));;
+        }
+        else {
+            this.date = null;
+        }
 
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override

@@ -22,31 +22,61 @@ import java.util.TreeSet;
 
 public class ExpensesAdapter extends BaseAdapter {
     private TreeSet<Expense> mExpenses;
+    private TreeSet<Expense> mSearchResults;
     private LayoutInflater mInflater;
     private Context expenseContext;
+    private boolean showSearchResults;
 
     public ExpensesAdapter(Context context, TreeSet<Expense> expenseList) {
         this.mInflater = LayoutInflater.from(context);
         this.mExpenses = expenseList;
         this.expenseContext = context;
+        this.showSearchResults = false;
     }
 
+    public boolean isShowSearchResults() {
+        return showSearchResults;
+    }
+
+    public void setSearchResults(TreeSet<Expense> expenses) {
+        this.mSearchResults = expenses;
+    }
+
+    public void setShowSearchResults(boolean showSearchResults) {
+        this.showSearchResults = showSearchResults;
+    }
 
     @Override
     public int getCount() {
+        if (showSearchResults) {
+            return mSearchResults.size();
+        }
         return mExpenses.size();
     }
 
     @Override
     public Object getItem(int i) {
-        int j=0;
+        int j = 0;
         Expense currentExpense = null;
-        for (Expense expense: mExpenses) {
-            if (i==j) {
-                currentExpense = expense;
+        if (showSearchResults) {
+            if (mSearchResults == null) {
+                return null;
             }
-            j++;
+            for (Expense expense : mSearchResults) {
+                if (i == j) {
+                    currentExpense = expense;
+                }
+                j++;
+            }
+        } else {
+            for (Expense expense : mExpenses) {
+                if (i == j) {
+                    currentExpense = expense;
+                }
+                j++;
+            }
         }
+
         return currentExpense;
     }
 
@@ -60,7 +90,7 @@ public class ExpensesAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         ExpenseViewHolder holder;
 
-        if (view ==null){
+        if (view == null) {
             LayoutInflater recordInflater = (LayoutInflater)
                     expenseContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             view = recordInflater.inflate(R.layout.expenses_row, null);
@@ -74,10 +104,9 @@ public class ExpensesAdapter extends BaseAdapter {
             holder.locationView = (TextView) view.findViewById(R.id.expense_location);
             view.setTag(holder);
 
-        }else {
+        } else {
             holder = (ExpenseViewHolder) view.getTag();
         }
-
         Expense expense = (Expense) getItem(i);
         holder.nameView.setText(expense.getName());
         holder.priceView.setText(expense.getPrice().toString());
@@ -85,25 +114,8 @@ public class ExpensesAdapter extends BaseAdapter {
         holder.categoryView.setText(expense.getCategory());
         holder.currencyView.setText(expense.getCurrency());
         holder.locationView.setText(expense.getLocation());
-        Log.d("TEST","here ");
+        Log.d("TEST", "here ");
         return view;
     }
 
-    /*
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        ExpenseViewHolder expenseViewHolder = (ExpenseViewHolder) holder;
-
-        DateFormat df = new SimpleDateFormat("dd/MM/yy");
-
-        expenseViewHolder.nameView.setText(currentExpense.getName());
-        expenseViewHolder.currencyView.setText(currentExpense.getCurrency());
-        expenseViewHolder.priceView.setText(currentExpense.getPrice().toString());
-        expenseViewHolder.dateView.setText(currentExpense.getDate().toString());
-        expenseViewHolder.locationView.setText(currentExpense.getLocation());
-        //expenseViewHolder.notesView.setText(currentExpense.getNotes());
-        expenseViewHolder.categoryView.setText(currentExpense.getCategory());
-    }
-
-     */
 }
