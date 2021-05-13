@@ -16,12 +16,14 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,6 +31,8 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -39,8 +43,11 @@ import java.util.TreeSet;
 public class MainActivity extends AppCompatActivity {
     private ExpenseSheet expenses;
     private Activity currentActivity;
+    private ListView expensesView;
+    private int selectedPosition = -1;
     private ExpensesAdapter adapter;
-    SharedPreferences mPrefs;
+    private SharedPreferences mPrefs;
+    private SharedPreferences.Editor mEditor;
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,23 +59,20 @@ public class MainActivity extends AppCompatActivity {
         GsonBuilder builder = new GsonBuilder().registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
             @Override
             public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-                return LocalDate.parse(json.getAsJsonPrimitive().getAsString());
+                return LocalDate.parse(json.getAsString());
             }
         });
         builder.enableComplexMapKeySerialization();
 
 
 
-        SharedPreferences.Editor edit = mPrefs.edit();
-
-        edit.clear();
-        edit.commit();
-
+        mEditor = mPrefs.edit();
 
         Gson gson = builder.create();
+
         if (mPrefs.contains("storedSheet")) {
             String json = mPrefs.getString("storedSheet", "");
-            Log.d("TEST", json);
+            Log.d("TEST", mPrefs.getString("storedSheet",""));
             try {
                 expenses = gson.fromJson(json, ExpenseSheet.class);
             }
@@ -82,11 +86,8 @@ public class MainActivity extends AppCompatActivity {
             expenses = new ExpenseSheet();
         }
 
-
-        //expenses = new ExpenseSheet();
-
-
         adapter = new ExpensesAdapter(getApplicationContext(), expenses.sortedExpenses);
+        /*
         Expense expense = null;
         Expense expense2 = null;
         Expense expense3 = null;
@@ -121,14 +122,60 @@ public class MainActivity extends AppCompatActivity {
         expenses.addExpense(expense6);
         expenses.addExpense(expense8);
         expenses.addExpense(expense9);
+        */
 
-
-        final ListView expensesView = (ListView) findViewById(R.id.records_list);
+        expensesView = (ListView) findViewById(R.id.records_list);
         expensesView.setAdapter(adapter);
+        expensesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                selectedPosition = i;
+                if (expensesView.getSelector().getAlpha() == 0) {
+                    expensesView.getSelector().setAlpha(255);
+                }
+            }
+        });
 
 
 
+    }
+    public void hideListViewSelector() {
+        expensesView.getSelector().setAlpha(0);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void deleteExpenseButtonClick(View view) {
+        if (selectedPosition == -1) {
+            Toast.makeText(getApplicationContext(), "Please select an expense to delete first.", Toast.LENGTH_LONG).show();
+        }
+        else {
+            Log.d("TEST", String.valueOf(selectedPosition));
+            Expense expense = (Expense) adapter.getItem(selectedPosition);
+            expenses.removeExpense(expense);
+            adapter.notifyDataSetChanged();
+            saveData();
+            hideListViewSelector();
+            selectedPosition = -1;
 
+        }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void saveData() {
+
+        GsonBuilder builder = new GsonBuilder().registerTypeAdapter(LocalDate.class, new JsonSerializer<LocalDate>() {
+
+            @Override
+            public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
+                return context.serialize(src.toString());
+            }
+
+        });
+
+        builder.enableComplexMapKeySerialization();
+        Gson gson = builder.create();
+        String json = gson.toJson(expenses, ExpenseSheet.class);
+        Log.d("TEST",json);
+        mEditor.putString("storedSheet", json);
+        mEditor.commit();
     }
     public void addExpenseButtonClick(View view) {
 
@@ -173,23 +220,10 @@ public class MainActivity extends AppCompatActivity {
                     String notes = notesText.getText().toString();
                     Expense newExpense = new Expense(name, date, price, location, currency, category, notes);
                     expenses.addExpense(newExpense);
-                    SharedPreferences.Editor prefsEditor = mPrefs.edit();
-                    GsonBuilder builder = new GsonBuilder().registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
-                        @Override
-                        public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-                            return LocalDate.parse(json.getAsJsonPrimitive().getAsString());
-                        }
-                    });
-
-                    builder.enableComplexMapKeySerialization();
-                    builder.setPrettyPrinting();
-                    Gson gson = builder.create();
-
-                    String json = gson.toJson(expenses, ExpenseSheet.class);
-                    prefsEditor.putString("storedSheet", json);
-                    prefsEditor.commit();
-                    popupWindow.dismiss();
                     adapter.notifyDataSetChanged();
+                    saveData();
+                    popupWindow.dismiss();
+
                 }
                 catch (Exception e) {
                     Log.d("ERROR", String.valueOf(e));

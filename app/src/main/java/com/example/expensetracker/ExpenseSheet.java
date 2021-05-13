@@ -165,6 +165,9 @@ public class ExpenseSheet {
     }
 
     public boolean removeExpense(Expense expense) {
+        if (expense == null) {
+            return false;
+        }
         if (nameMap.containsKey(expense.getName())) {
             nameMap.get(expense.getName()).remove(expense);
         }

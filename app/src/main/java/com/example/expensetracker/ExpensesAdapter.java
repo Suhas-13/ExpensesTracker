@@ -2,6 +2,7 @@ package com.example.expensetracker;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,10 +11,12 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.TreeSet;
 
@@ -52,6 +55,7 @@ public class ExpensesAdapter extends BaseAdapter {
         return i;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         ExpenseViewHolder holder;
@@ -77,7 +81,7 @@ public class ExpensesAdapter extends BaseAdapter {
         Expense expense = (Expense) getItem(i);
         holder.nameView.setText(expense.getName());
         holder.priceView.setText(expense.getPrice().toString());
-        holder.dateView.setText(expense.getDate().toString());
+        holder.dateView.setText(expense.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         holder.categoryView.setText(expense.getCategory());
         holder.currencyView.setText(expense.getCurrency());
         holder.locationView.setText(expense.getLocation());
