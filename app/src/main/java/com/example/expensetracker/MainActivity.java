@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 
 import com.google.gson.Gson;
@@ -31,6 +32,7 @@ import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.TreeSet;
 
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private Activity currentActivity;
     private ExpensesAdapter adapter;
     SharedPreferences mPrefs;
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,18 +49,21 @@ public class MainActivity extends AppCompatActivity {
         this.currentActivity = this;
         mPrefs = getPreferences(MODE_PRIVATE);
 
-        GsonBuilder builder = new GsonBuilder();
+        GsonBuilder builder = new GsonBuilder().registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
+            @Override
+            public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+                return LocalDate.parse(json.getAsJsonPrimitive().getAsString());
+            }
+        });
         builder.enableComplexMapKeySerialization();
 
-        /*
+
 
         SharedPreferences.Editor edit = mPrefs.edit();
 
         edit.clear();
         edit.commit();
 
-
-         */
 
         Gson gson = builder.create();
         if (mPrefs.contains("storedSheet")) {
@@ -79,11 +85,46 @@ public class MainActivity extends AppCompatActivity {
 
         //expenses = new ExpenseSheet();
 
-        RecyclerView expensesRecycler = (RecyclerView) findViewById(R.id.expensesView);
+
         adapter = new ExpensesAdapter(getApplicationContext(), expenses.sortedExpenses);
-        expensesRecycler.setAdapter(adapter);
-        // Set layout manager to position the items
-        expensesRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, true));
+        Expense expense = null;
+        Expense expense2 = null;
+        Expense expense3 = null;
+        Expense expense4 = null;
+        Expense expense5 = null;
+        Expense expense6 = null;
+        Expense expense7 = null;
+        Expense expense8 = null;
+        Expense expense9 = null;
+        try {
+            expense = new Expense("test","08/08/2012", 32.1, "test ocation", "sgd", "category", "testnotes");
+            expense2 = new Expense("abc","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
+            expense3 = new Expense("gef","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
+            expense4 = new Expense("basdasd","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
+            expense5 = new Expense("asdadsadasdasdasd","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
+            expense6 = new Expense("azzx","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
+            expense7 = new Expense("ccxcxz","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
+            expense8 = new Expense("asdad","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
+            expense9 = new Expense("ddddddddd","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
+
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        expenses.addExpense(expense);
+        expenses.addExpense(expense2);
+        expenses.addExpense(expense3);
+        expenses.addExpense(expense4);
+        expenses.addExpense(expense5);
+        expenses.addExpense(expense7);
+        expenses.addExpense(expense6);
+        expenses.addExpense(expense8);
+        expenses.addExpense(expense9);
+
+
+        final ListView expensesView = (ListView) findViewById(R.id.records_list);
+        expensesView.setAdapter(adapter);
 
 
 
@@ -133,9 +174,17 @@ public class MainActivity extends AppCompatActivity {
                     Expense newExpense = new Expense(name, date, price, location, currency, category, notes);
                     expenses.addExpense(newExpense);
                     SharedPreferences.Editor prefsEditor = mPrefs.edit();
-                    GsonBuilder builder = new GsonBuilder();
+                    GsonBuilder builder = new GsonBuilder().registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
+                        @Override
+                        public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+                            return LocalDate.parse(json.getAsJsonPrimitive().getAsString());
+                        }
+                    });
+
                     builder.enableComplexMapKeySerialization();
+                    builder.setPrettyPrinting();
                     Gson gson = builder.create();
+
                     String json = gson.toJson(expenses, ExpenseSheet.class);
                     prefsEditor.putString("storedSheet", json);
                     prefsEditor.commit();
