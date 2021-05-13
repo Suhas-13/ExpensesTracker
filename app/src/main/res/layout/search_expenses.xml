@@ -12,12 +12,19 @@
 
     android:background="#FFFFFF">
 
+
+    <com.google.android.material.slider.RangeSlider
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:valueFrom="0.0"
+        android:valueTo="100.0" />
+
     <TextView
         android:id="@+id/expenseText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="70dp"
-        android:hint="Add New Expense"
+        android:hint="Search Expenses"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

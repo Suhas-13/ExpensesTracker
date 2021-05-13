@@ -233,7 +233,68 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window tolken
+        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+
+
+    }
+
+
+    public void searchButtonClick(View view) {
+
+        // inflate the layout of the popup window
+        LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View popupView = inflater.inflate(R.layout.search_expenses, null);
+
+        // create the popup window
+        int width = currentActivity.getWindow().getDecorView().getWidth();
+        int height = currentActivity.getWindow().getDecorView().getHeight();
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+
+        final ImageView closePopup =  popupView.findViewById(R.id.closePopup);
+        final EditText locationText =  popupView.findViewById(R.id.locationField);
+        final EditText nameText =  popupView.findViewById(R.id.nameField);
+        final EditText priceText =  popupView.findViewById(R.id.priceField);
+        final EditText currencyText =  popupView.findViewById(R.id.currencyField);
+        final EditText categoryText =  popupView.findViewById(R.id.categoryField);
+        final EditText dateText =  popupView.findViewById(R.id.dateField);
+        final EditText notesText =  popupView.findViewById(R.id.notesField);
+        final Button submit =  popupView.findViewById(R.id.addExpenseButton);
+        closePopup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+        submit.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onClick(View v) {
+                try {
+                    String name = nameText.getText().toString();
+                    String location = locationText.getText().toString();
+                    double price = Double.parseDouble(priceText.getText().toString());
+                    String currency = currencyText.getText().toString();
+                    String category = categoryText.getText().toString();
+                    String date = dateText.getText().toString();
+                    String notes = notesText.getText().toString();
+                    Expense newExpense = new Expense(name, date, price, location, currency, category, notes);
+                    expenses.addExpense(newExpense);
+                    adapter.notifyDataSetChanged();
+                    saveData();
+                    popupWindow.dismiss();
+
+                }
+                catch (Exception e) {
+                    Log.d("ERROR", String.valueOf(e));
+                }
+
+            }
+        });
+
+        // show the popup window
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
 
 
