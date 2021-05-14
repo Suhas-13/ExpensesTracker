@@ -88,6 +88,14 @@ public class ExpenseSheet {
             arr.add(expense);
             dateMap.put(expense.getDate(), arr);
         }
+        if (currencyMap.containsKey(expense.getCurrency())) {
+            currencyMap.get(expense.getCurrency()).add(expense);
+        }
+        else {
+            ArrayList<Expense> arr = new ArrayList<Expense>();
+            arr.add(expense);
+            currencyMap.put(expense.getCurrency(), arr);
+        }
 
         if (priceMap.containsKey(expense.getPrice())) {
             priceMap.get(expense.getPrice()).add(expense);
@@ -143,7 +151,6 @@ public class ExpenseSheet {
 
     }
     public ArrayList<Expense> searchByRange(Range priceRange) {
-
         NavigableMap<Double, ArrayList<Expense>> withinRange = priceMap.subMap(priceRange.getPriceLow(), true, priceRange.getPriceHigh(), true);
         ArrayList<Expense> output = new ArrayList<Expense>();
         for (Entry<Double,ArrayList<Expense>> entry: withinRange.entrySet()) {
@@ -178,7 +185,6 @@ public class ExpenseSheet {
             numCriteria++;
             searchHelper(partialExpense, searchList, "priceRange");
         }
-        Log.d("TEST","Num criteria" + numCriteria);
         TreeSet<Expense> output = new TreeSet<Expense>();
         for (Expense expense: searchList.keySet()) {
             if (searchList.get(expense) == numCriteria) {
@@ -206,6 +212,9 @@ public class ExpenseSheet {
 
         if (dateMap.containsKey(expense.getDate())) {
             dateMap.get(expense.getDate()).remove(expense);
+        }
+        if (currencyMap.containsKey(expense.getCurrency())) {
+            currencyMap.get(expense.getCurrency()).remove(expense);
         }
 
         if (priceMap.containsKey(expense.getPrice())) {

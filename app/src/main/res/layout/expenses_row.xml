@@ -7,13 +7,13 @@
     <TextView
         android:layout_width="25dp"
         android:layout_height="wrap_content"
-        android:id="@+id/expense_name"
+        android:id="@+id/expense_category"
         android:layout_weight="0.25"
         android:gravity="center"/>
     <TextView
         android:layout_width="25dp"
         android:layout_height="wrap_content"
-        android:id="@+id/expense_category"
+        android:id="@+id/expense_name"
         android:layout_weight="0.25"
         android:gravity="center"/>
     <TextView

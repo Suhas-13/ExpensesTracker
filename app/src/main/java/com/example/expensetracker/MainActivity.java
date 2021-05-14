@@ -13,11 +13,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputType;
+import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,8 +28,11 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -46,6 +51,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
@@ -128,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (mPrefs.contains("storedSheet")) {
             String json = mPrefs.getString("storedSheet", "");
-            Log.d("TEST", mPrefs.getString("storedSheet",""));
+            Log.d("TEST",json);
             try {
                 expenses = gson.fromJson(json, ExpenseSheet.class);
             }
@@ -142,35 +148,6 @@ public class MainActivity extends AppCompatActivity {
             expenses = new ExpenseSheet();
         }
         adapter = new ExpensesAdapter(getApplicationContext(), expenses.sortedExpenses);
-        /*
-        Expense expense = null;
-        Expense expense2 = null;
-        Expense expense3 = null;
-        Expense expense4 = null;
-        Expense expense5 = null;
-        Expense expense6 = null;
-        Expense expense7 = null;
-        Expense expense8 = null;
-        Expense expense9 = null;
-        try {
-            expense = new Expense("test","08/08/2012", 32.1, "test ocation", "sgd", "category", "testnotes");
-            expense2 = new Expense("abc","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
-            expense3 = new Expense("gef","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
-            expense4 = new Expense("basdasd","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
-            expense5 = new Expense("asdadsadasdasdasd","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
-            expense6 = new Expense("azzx","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
-            expense7 = new Expense("ccxcxz","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
-            expense8 = new Expense("asdad","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
-            expense9 = new Expense("ddddddddd","08/08/2012", 32.1, "testl ocation", "sgd", "category", "testnotes");
-
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-
-        */
-
         expensesView = (ListView) findViewById(R.id.records_list);
         expensesView.setAdapter(adapter);
         expensesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -260,6 +237,9 @@ public class MainActivity extends AppCompatActivity {
         else {
             Expense expense = (Expense) adapter.getItem(selectedPosition);
             currentOperationStack.removeExpense(expense);
+            if (adapter.isShowSearchResults()) {
+                adapter.deleteFromSearchTree(expense);
+            }
             adapter.notifyDataSetChanged();
             saveData();
             hideListViewSelector();
@@ -346,7 +326,113 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void setupExpenseAnalysisData(LinearLayout dataList, LayoutInflater inflater, String mainText, boolean averagesMode) {
+        dataList.removeAllViews();
+        View currencyView = inflater.inflate(R.layout.analysis_row, null);
+        TextView currencyTextView = (TextView) currencyView.findViewById(R.id.expense_currency);
+        TextView currencyTotalView = (TextView) currencyView.findViewById(R.id.expense_value);
+        currencyTextView.setText("Currency");
+        currencyTotalView.setText(mainText);
+        currencyTotalView.setAllCaps(true);
+        currencyTotalView.setTextSize(18);
 
+        currencyTextView.setAllCaps(true);
+        currencyTextView.setTextSize(18);
+        currencyTextView.setTypeface(null, Typeface.BOLD);
+        currencyTotalView.setTypeface(null, Typeface.BOLD);
+
+        dataList.addView(currencyView);
+        HashMap<String, Double> currencyValues;
+        if (averagesMode) {
+             currencyValues = DataAnalysis.calculateAverages(expenses);
+        }
+        else {
+             currencyValues = DataAnalysis.calculateTotal(expenses);
+        }
+
+        for (String currency: currencyValues.keySet()) {
+            currencyView = inflater.inflate(R.layout.analysis_row, null);
+            currencyTextView = (TextView) currencyView.findViewById(R.id.expense_currency);
+            currencyTotalView = (TextView) currencyView.findViewById(R.id.expense_value);
+            currencyTextView.setText(currency);
+            currencyTotalView.setText(String.valueOf(currencyValues.get(currency)));
+            currencyTextView.setTextSize(17);
+            currencyTotalView.setTextSize(17);
+            dataList.addView(currencyView);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void openDataAnalysis(View view) {
+        // inflate the layout of the popup window
+        final LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View popupView = inflater.inflate(R.layout.data_analysis, null);
+
+        // create the popup window
+        int width = currentActivity.getWindow().getDecorView().getWidth();
+        int height = currentActivity.getWindow().getDecorView().getHeight();
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        final Button outlierButton = popupView.findViewById(R.id.findOutliers);
+        final ImageView closePopup =  popupView.findViewById(R.id.closePopup);
+        final Button searchButton = (Button) (findViewById(R.id.searchButton));
+        final Button dataButton = (Button) (findViewById(R.id.openDataAnalysis));
+        final Button averageButton = (Button) (popupView.findViewById(R.id.averageExpenditure));
+        final Button totalButton = (Button) (popupView.findViewById(R.id.totalExpenditure));
+        final LinearLayout dataList = (LinearLayout) (popupView.findViewById(R.id.dataListView));
+        if (adapter.isShowSearchResults()) {
+            dataButton.setText("Data Analysis");
+            searchButton.setText("Search Records");
+            adapter.setShowSearchResults(false);
+            adapter.setSearchResults(null);
+            refreshAdapter();
+            popupWindow.dismiss();
+            return;
+        }
+        averageButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onClick(View v) {
+                setupExpenseAnalysisData(dataList, inflater, "Average Expenditure", true);
+            }
+        });
+        totalButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onClick(View v) {
+                Log.d("TEST","CLICKED");
+                setupExpenseAnalysisData(dataList, inflater, "Total Expenditure", false);
+            }
+        });
+        outlierButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onClick(View v) {
+                TreeSet<Expense> outliers = DataAnalysis.findOutliers(expenses);
+                adapter.setSearchResults(outliers);
+                adapter.setShowSearchResults(true);
+                dataButton.setText("Hide Outliers");
+                searchButton.setText("Search Records");
+                popupWindow.dismiss();
+                refreshAdapter();
+            }
+        });
+
+        closePopup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+
+        // show the popup window
+        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+
+
+    }
 
     public void searchButtonClick(View view) {
 
@@ -355,14 +441,17 @@ public class MainActivity extends AppCompatActivity {
                 getSystemService(LAYOUT_INFLATER_SERVICE);
         final View popupView = inflater.inflate(R.layout.search_expenses, null);
         final Button searchButton = findViewById(R.id.searchButton);
+        final Button dataButton = (Button) (findViewById(R.id.openDataAnalysis));
         if (adapter.isShowSearchResults()) {
             adapter.setShowSearchResults(false);
             adapter.setSearchResults(null);
             searchButton.setText("Search Records");
-            adapter.notifyDataSetChanged();
+            dataButton.setText("Data Analysis");
+            refreshAdapter();
             return;
         }
         searchButton.setText("Exit Search");
+        dataButton.setText("Data Analysis");
         // create the popup window
         int width = currentActivity.getWindow().getDecorView().getWidth();
         int height = currentActivity.getWindow().getDecorView().getHeight();
@@ -387,6 +476,7 @@ public class MainActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 popupWindow.dismiss();
                 searchButton.setText("Search Records");
+                dataButton.setText("Data Analysis");
             }
         });
 
@@ -414,14 +504,12 @@ public class MainActivity extends AppCompatActivity {
                         newExpense.setDate(date);
                         newExpense.setPriceRange(rangeObject);
                         TreeSet<Expense> expenseList = expenses.multiSearch(newExpense);
-                        Log.d("TEST", String.valueOf(expenseList));
                         adapter.setSearchResults(expenseList);
                         adapter.setShowSearchResults(true);
                         refreshAdapter();
                         popupWindow.dismiss();
                 }
                 catch (Exception e) {
-                    Log.d("ERROR", String.valueOf(e));
                 }
 
             }

@@ -26,14 +26,15 @@ public class ExpensesAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
     private Context expenseContext;
     private boolean showSearchResults;
-
     public ExpensesAdapter(Context context, TreeSet<Expense> expenseList) {
         this.mInflater = LayoutInflater.from(context);
         this.mExpenses = expenseList;
         this.expenseContext = context;
         this.showSearchResults = false;
     }
-
+    public void deleteFromSearchTree(Expense deleteExpense) {
+        mSearchResults.remove(deleteExpense);
+    }
     public boolean isShowSearchResults() {
         return showSearchResults;
     }

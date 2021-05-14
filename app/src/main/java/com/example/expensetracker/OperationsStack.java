@@ -21,11 +21,10 @@ public class OperationsStack {
     }
     public void performUndo() {
         if (!undoOperations.empty()) {
-            Log.d("TEST","UNDOING");
             Operation recentOperation = undoOperations.pop();
             if (recentOperation.getOperationType() == recentOperation.ADD_OPERATION) {
                 MainActivity.expenses.removeExpense(recentOperation.getOperationExpense());
-            }c
+            }
             else if (recentOperation.getOperationType() == recentOperation.REMOVE_OPERATION) {
                 MainActivity.expenses.addExpense(recentOperation.getOperationExpense());
             }
@@ -35,7 +34,6 @@ public class OperationsStack {
     }
     public void performRedo() {
         if (!redoOperations.empty()) {
-            Log.d("TEST","REDOING");
             Operation recentOperation = redoOperations.pop();
 
             if (recentOperation.getOperationType() == recentOperation.ADD_OPERATION) {
