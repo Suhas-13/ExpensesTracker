@@ -7,6 +7,45 @@
 
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/newSheetButton"
+        android:layout_width="101dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="80dp"
+        android:layout_marginBottom="15dp"
+        android:onClick="newSheetClick"
+        android:text="New Sheet"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/undoButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/records_list" />
+
+    <Button
+        android:id="@+id/redoButton"
+        android:layout_width="70dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="20dp"
+        android:drawableTop="@drawable/redo_operation"
+        android:onClick="redoButtonClick"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/undoButton"
+        app:layout_constraintTop_toBottomOf="@+id/records_list" />
+
+    <Button
+        android:id="@+id/undoButton"
+        android:layout_width="70dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="20dp"
+        android:drawableTop="@drawable/undo_operation"
+        android:onClick="undoButtonClick"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/redoButton"
+        app:layout_constraintStart_toEndOf="@+id/newSheetButton"
+        app:layout_constraintTop_toBottomOf="@+id/records_list" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -52,11 +91,12 @@
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
-        android:id="@+id/button5"
+        android:id="@+id/importButton"
         android:layout_width="152dp"
         android:layout_height="55dp"
         android:layout_marginStart="15dp"
         android:layout_marginTop="15dp"
+        android:onClick="importSheetClick"
         android:text="Import Sheet"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button3" />
@@ -75,12 +115,13 @@
         app:layout_constraintTop_toBottomOf="@+id/button2" />
 
     <Button
-        android:id="@+id/button6"
+        android:id="@+id/exportButton"
         android:layout_width="152dp"
         android:layout_height="55dp"
         android:layout_marginStart="30dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="20dp"
+        android:onClick="exportSheetClick"
         android:text="Export Sheet"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/button3"
@@ -96,38 +137,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addRecordButton" />
 
-    <Button
-        android:id="@+id/button7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="16dp"
-        android:onClick="newSheetClick"
-        android:text="New Sheet"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <TableLayout
         android:id="@+id/expense_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="300dp"
-        app:layout_constraintBottom_toTopOf="@+id/button7"
-        app:layout_constraintTop_toBottomOf="@+id/button6"
+        app:layout_constraintTop_toBottomOf="@+id/exportButton"
         tools:ignore="MissingConstraints" />
 
     <ListView
         android:id="@+id/records_list"
         android:layout_width="match_parent"
-        android:layout_height="215dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/button7"
-        app:layout_constraintTop_toBottomOf="@+id/table_row1"
+        android:layout_height="175dp"
+        android:layout_marginBottom="15dp"
         android:choiceMode="singleChoice"
         android:listSelector="#666666"
-        tools:layout_editor_absoluteX="0dp"></ListView>
+        app:layout_constraintBottom_toTopOf="@+id/newSheetButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/table_row1"></ListView>
 
     <TableRow
         android:id="@+id/table_row1"
@@ -199,36 +228,6 @@
             android:textSize="14sp" />
 
     </TableRow>
-
-    <Button
-        android:id="@+id/redoButton"
-        android:layout_width="73dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="29dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:drawableTop="@drawable/redo_operation"
-        android:onClick="redoButtonClick"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/undoButton"
-        app:layout_constraintTop_toBottomOf="@+id/records_list" />
-
-    <Button
-        android:id="@+id/undoButton"
-        android:layout_width="73dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="126dp"
-        android:layout_marginTop="29dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginBottom="16dp"
-        android:drawableTop="@drawable/undo_operation"
-        android:onClick="undoButtonClick"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/redoButton"
-        app:layout_constraintStart_toEndOf="@+id/button7"
-        app:layout_constraintTop_toBottomOf="@+id/records_list" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

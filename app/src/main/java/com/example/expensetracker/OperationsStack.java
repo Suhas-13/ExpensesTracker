@@ -1,5 +1,7 @@
 package com.example.expensetracker;
 
+import android.util.Log;
+
 import java.util.Stack;
 
 /**
@@ -9,21 +11,23 @@ import java.util.Stack;
 public class OperationsStack {
     private Stack<Operation> undoOperations;
     private Stack<Operation> redoOperations;
-    private ExpenseSheet expenseSheet;
     public boolean addExpense(Expense expense) {
-        return expenseSheet.addExpense(expense);
+        undoOperations.add(new Operation(expense, Operation.ADD_OPERATION));
+        return MainActivity.expenses.addExpense(expense);
     }
     public boolean removeExpense(Expense expense) {
-        return expenseSheet.removeExpense(expense);
+        undoOperations.add(new Operation(expense, Operation.REMOVE_OPERATION));
+        return MainActivity.expenses.removeExpense(expense);
     }
     public void performUndo() {
         if (!undoOperations.empty()) {
+            Log.d("TEST","UNDOING");
             Operation recentOperation = undoOperations.pop();
             if (recentOperation.getOperationType() == recentOperation.ADD_OPERATION) {
-                addExpense(recentOperation.getOperationExpense());
-            }
+                MainActivity.expenses.removeExpense(recentOperation.getOperationExpense());
+            }c
             else if (recentOperation.getOperationType() == recentOperation.REMOVE_OPERATION) {
-                removeExpense(recentOperation.getOperationExpense());
+                MainActivity.expenses.addExpense(recentOperation.getOperationExpense());
             }
             recentOperation.toggleOperationType();
             redoOperations.push(recentOperation);
@@ -31,20 +35,20 @@ public class OperationsStack {
     }
     public void performRedo() {
         if (!redoOperations.empty()) {
+            Log.d("TEST","REDOING");
             Operation recentOperation = redoOperations.pop();
 
             if (recentOperation.getOperationType() == recentOperation.ADD_OPERATION) {
-                addExpense(recentOperation.getOperationExpense());
+                removeExpense(recentOperation.getOperationExpense());
             }
             else if (recentOperation.getOperationType() == recentOperation.REMOVE_OPERATION) {
-                removeExpense(recentOperation.getOperationExpense());
+                addExpense(recentOperation.getOperationExpense());
             }
             recentOperation.toggleOperationType();
             undoOperations.push(recentOperation);
         }
     }
-    public OperationsStack(ExpenseSheet expenseSheet) {
-        this.expenseSheet = expenseSheet;
+    public OperationsStack() {
         this.undoOperations = new Stack<Operation>();
         this.redoOperations = new Stack<Operation>();
     }

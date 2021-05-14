@@ -2,31 +2,30 @@ package com.example.expensetracker;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.FileUtils;
+import android.os.Environment;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.Toast;
@@ -39,30 +38,78 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.opencsv.CSVParser;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.TreeSet;
+import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity {
-    private ExpenseSheet expenses;
-    private Activity currentActivity;
+    public static ExpenseSheet expenses;
+    public static Activity currentActivity;
     private ListView expensesView;
     private int selectedPosition = -1;
+    public static Context mainContext;
     private ExpensesAdapter adapter;
     private SharedPreferences mPrefs;
     private OperationsStack currentOperationStack;
     private SharedPreferences.Editor mEditor;
+
+    public void refreshAdapter() {
+        this.adapter.notifyDataSetChanged();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void loadExpenseSheet(ExpenseSheet newExpenses) {
+        this.expenses = newExpenses;
+        adapter.setExpenses(this.expenses.sortedExpenses);
+        adapter.setSearchResults(null);
+        adapter.setShowSearchResults(false);
+        refreshAdapter();
+        saveData();
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case 112: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "The app was allowed to write to your storage!", Toast.LENGTH_LONG).show();
+                    try {
+                        exportSheetClick(null);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast.makeText(this, "The app was not allowed to write to your storage. Hence, it cannot function properly. Please consider granting it this permission", Toast.LENGTH_LONG).show();
+                }
+            }
+            case 142: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "The app was allowed to read from your storage!", Toast.LENGTH_LONG).show();
+                    importSheetClick(null);
+                } else {
+                    Toast.makeText(this, "The app was not allowed to read from your storage. Hence, it cannot function properly. Please consider granting it this permission", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.currentActivity = this;
+        this.mainContext = getApplicationContext();
         mPrefs = getPreferences(MODE_PRIVATE);
 
         GsonBuilder builder = new GsonBuilder().registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
@@ -72,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.enableComplexMapKeySerialization();
-
+        currentOperationStack = new OperationsStack();
 
 
         mEditor = mPrefs.edit();
@@ -94,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
         else {
             expenses = new ExpenseSheet();
         }
-
         adapter = new ExpensesAdapter(getApplicationContext(), expenses.sortedExpenses);
         /*
         Expense expense = null;
@@ -122,15 +168,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        expenses.addExpense(expense);
-        expenses.addExpense(expense2);
-        expenses.addExpense(expense3);
-        expenses.addExpense(expense4);
-        expenses.addExpense(expense5);
-        expenses.addExpense(expense7);
-        expenses.addExpense(expense6);
-        expenses.addExpense(expense8);
-        expenses.addExpense(expense9);
+
         */
 
         expensesView = (ListView) findViewById(R.id.records_list);
@@ -147,16 +185,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void newSheetClick(View view) {
-        this.expenses = new ExpenseSheet();
-        adapter.setExpenses(this.expenses.sortedExpenses);
-        adapter.setSearchResults(null);
-        adapter.setShowSearchResults(false);
-        adapter.notifyDataSetChanged();
+        loadExpenseSheet(new ExpenseSheet());
+        saveData();
     }
     public void undoButtonClick(View view) {
         currentOperationStack.performUndo();
-        adapter.notifyDataSetChanged();
+        refreshAdapter();
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -164,10 +200,8 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case 1:
                 if (resultCode == RESULT_OK) {
-                    Uri uri = data.getData();
-                    String path = uri.getPath();
                     try {
-                        this.expenses = CsvHandler.importCsv(path);
+                        this.expenses = CsvHandler.importCsv(data.getData().getLastPathSegment());
                         this.adapter.setSearchResults(this.expenses.sortedExpenses);
                         this.adapter.setShowSearchResults(false);
                         this.adapter.setSearchResults(null);
@@ -177,39 +211,43 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+            case 123: {
+                if (resultCode  == RESULT_OK){
+                    try {
+                        ExpenseSheet expenseSheet = CsvHandler.importCsv(data.getData().getLastPathSegment());
+                        if (expenseSheet != null) {
+                            loadExpenseSheet(expenseSheet);
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "Error reading file in, is it the correct file type(csv)?", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
     public void importSheetClick(View view) {
-        Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
-        chooseFile.setType("*/*");
-        chooseFile = Intent.createChooser(chooseFile, "Choose a file");
-        startActivityForResult(chooseFile, 1);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(Intent.createChooser(intent, "Choose CSV File"), 123);
     }
-    public void exportSheetClick(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Title");
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String text = input.getText().toString();
-                try {
-                    CsvHandler.exportCsv(expenses, text);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        builder.show();
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void exportSheetClick(View view) throws IOException {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime currentDate = LocalDateTime.now();
+        CsvHandler.exportCsv(expenses, "expenses" + dtf.format(currentDate).toString() +"-" + (int) (Math.random() * 1000));
     }
     public void redoButtonClick(View view) {
         currentOperationStack.performRedo();
-        adapter.notifyDataSetChanged();
+        refreshAdapter();
     }
     public void hideListViewSelector() {
         expensesView.getSelector().setAlpha(0);
@@ -221,7 +259,6 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             Expense expense = (Expense) adapter.getItem(selectedPosition);
-            expenses.removeExpense(expense);
             currentOperationStack.removeExpense(expense);
             adapter.notifyDataSetChanged();
             saveData();
@@ -291,10 +328,9 @@ public class MainActivity extends AppCompatActivity {
                     String date = dateText.getText().toString();
                     String notes = notesText.getText().toString();
                     Expense newExpense = new Expense(name, date, price, location, currency, category, notes);
-                    expenses.addExpense(newExpense);
+                    currentOperationStack.addExpense(newExpense);
                     adapter.notifyDataSetChanged();
                     saveData();
-                    currentOperationStack.addExpense(newExpense);
                     popupWindow.dismiss();
 
                 }
@@ -381,7 +417,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("TEST", String.valueOf(expenseList));
                         adapter.setSearchResults(expenseList);
                         adapter.setShowSearchResults(true);
-                        adapter.notifyDataSetChanged();
+                        refreshAdapter();
                         popupWindow.dismiss();
                 }
                 catch (Exception e) {
