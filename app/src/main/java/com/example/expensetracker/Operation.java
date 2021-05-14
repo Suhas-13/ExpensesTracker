@@ -10,7 +10,15 @@ public class Operation {
     public static int REMOVE_OPERATION = 2;
     private int operationType;
     private Expense operationExpense;
-    public Operation(Expense opeartionExpense, int operationType) {
+    public void toggleOperationType() {
+        if (this.operationType == 1) {
+            this.operationType = 2;
+        }
+        else if (this.operationType == 2) {
+            this.operationType = 1;
+        }
+    }
+    public Operation(Expense operationExpense, int operationType) {
         this.operationExpense = operationExpense;
         this.operationType = operationType;
     }

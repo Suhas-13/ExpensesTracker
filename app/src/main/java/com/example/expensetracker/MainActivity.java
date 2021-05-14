@@ -6,10 +6,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.FileUtils;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -33,7 +39,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.opencsv.CSVParser;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -47,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private int selectedPosition = -1;
     private ExpensesAdapter adapter;
     private SharedPreferences mPrefs;
+    private OperationsStack currentOperationStack;
     private SharedPreferences.Editor mEditor;
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -136,8 +145,71 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
 
-
+    public void newSheetClick(View view) {
+        this.expenses = new ExpenseSheet();
+        adapter.setExpenses(this.expenses.sortedExpenses);
+        adapter.setSearchResults(null);
+        adapter.setShowSearchResults(false);
+        adapter.notifyDataSetChanged();
+    }
+    public void undoButtonClick(View view) {
+        currentOperationStack.performUndo();
+        adapter.notifyDataSetChanged();
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case 1:
+                if (resultCode == RESULT_OK) {
+                    Uri uri = data.getData();
+                    String path = uri.getPath();
+                    try {
+                        this.expenses = CsvHandler.importCsv(path);
+                        this.adapter.setSearchResults(this.expenses.sortedExpenses);
+                        this.adapter.setShowSearchResults(false);
+                        this.adapter.setSearchResults(null);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+    public void importSheetClick(View view) {
+        Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
+        chooseFile.setType("*/*");
+        chooseFile = Intent.createChooser(chooseFile, "Choose a file");
+        startActivityForResult(chooseFile, 1);
+    }
+    public void exportSheetClick(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Title");
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String text = input.getText().toString();
+                try {
+                    CsvHandler.exportCsv(expenses, text);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        builder.show();
+    }
+    public void redoButtonClick(View view) {
+        currentOperationStack.performRedo();
+        adapter.notifyDataSetChanged();
     }
     public void hideListViewSelector() {
         expensesView.getSelector().setAlpha(0);
@@ -150,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
         else {
             Expense expense = (Expense) adapter.getItem(selectedPosition);
             expenses.removeExpense(expense);
+            currentOperationStack.removeExpense(expense);
             adapter.notifyDataSetChanged();
             saveData();
             hideListViewSelector();
@@ -221,6 +294,7 @@ public class MainActivity extends AppCompatActivity {
                     expenses.addExpense(newExpense);
                     adapter.notifyDataSetChanged();
                     saveData();
+                    currentOperationStack.addExpense(newExpense);
                     popupWindow.dismiss();
 
                 }

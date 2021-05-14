@@ -40,7 +40,18 @@ public class ExpenseSheet {
         this.priceMap = new TreeMap<Double, ArrayList<Expense> >();
         this.sortedExpenses = new TreeSet<Expense>();
     }
-
+    public ExpenseSheet(ArrayList<Expense> expenseList) {
+        this.nameMap = new HashMap<String, ArrayList<Expense> >();
+        this.categoryMap = new HashMap<String, ArrayList<Expense> >();
+        this.locationMap = new HashMap<String, ArrayList<Expense> >();
+        this.currencyMap = new HashMap<String, ArrayList<Expense> >();
+        this.dateMap = new HashMap<LocalDate, ArrayList<Expense> >();
+        this.priceMap = new TreeMap<Double, ArrayList<Expense> >();
+        this.sortedExpenses = new TreeSet<Expense>();
+        for (Expense e: expenseList) {
+            addExpense(e);
+        }
+    }
     public boolean addExpense(Expense expense) {
         if (nameMap.containsKey(expense.getName())) {
             nameMap.get(expense.getName()).add(expense);

@@ -42,6 +42,9 @@ public class ExpensesAdapter extends BaseAdapter {
         this.mSearchResults = expenses;
     }
 
+    public void setExpenses(TreeSet<Expense> expenses) {
+        this.mExpenses = expenses;
+    }
     public void setShowSearchResults(boolean showSearchResults) {
         this.showSearchResults = showSearchResults;
     }
