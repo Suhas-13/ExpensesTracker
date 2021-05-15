@@ -11,6 +11,9 @@ import java.util.TreeSet;
 
 public class DataAnalysis {
     private static Integer OUTLIER_VARIANCE = 50; // minimum variance to be classified as outlier in percentage.
+    /*
+    The findOutliers method takes in an expenseSheet. It then creates new auxiliary hashmaps, while iterating through the categoryMap keys it will calculate averages for each currency in each category. Once it has done this it will iterate through expenses again and identify transactions that differ by a percentage greater than the constant. If it differs enough it will be flagged as an outlier and returned in the TreeSet.
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public static TreeSet<Expense> findOutliers(ExpenseSheet expenses) {
         TreeSet<Expense> outliers = new TreeSet<Expense>();
@@ -34,6 +37,9 @@ public class DataAnalysis {
         }
         return outliers;
     }
+    /*
+    This simply takes in a expensesheet object and through iteration calculates the total sum associated with each currency, it thens returns a hashmap of this.
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public static HashMap<String, Double> calculateTotal(ExpenseSheet expenses) {
         HashMap<String, Double> currencyTotals = new HashMap<String, Double>();
@@ -45,7 +51,9 @@ public class DataAnalysis {
         }
         return currencyTotals;
     }
-
+    /*
+    This takes in an expensesheet and through iteration calculates total sum associated with each currency and number of transactions with each currency to calculate an average expenditure by currency which is returned in a hashmap.
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public static HashMap<String, Double> calculateAverages(ExpenseSheet expenses) {
         HashMap<String, Double> currencyTotals = new HashMap<String, Double>();

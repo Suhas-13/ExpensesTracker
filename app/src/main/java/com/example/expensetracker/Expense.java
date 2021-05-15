@@ -26,6 +26,9 @@ public class Expense implements Comparable<Expense> {
     private String currency;
     private Range priceRange;
 
+    /*
+    returns the given characteristic. i.e name returns the name for the expense object.
+     */
     public Object getCharacteristic(String characteristic) {
         if (characteristic.equals("name")) {
             return this.name;
@@ -50,6 +53,9 @@ public class Expense implements Comparable<Expense> {
         }
         return null;
     }
+    /*
+    simple constructor that also generates a random identifier and parses the date using dd/MM/yyyy using a DateTimeFormatter.
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Expense(String name, String date, double price, String location, String currency, String category, String notes) throws ParseException {
         this.name = name;
@@ -188,6 +194,9 @@ public class Expense implements Comparable<Expense> {
 
     }
 
+    /*
+    this first sorts by category as we wish to have expenses separated by category boundaries, then name is used, followed by location, price and then finally the random identifier that all expenseObjects have to prevent duplicates.
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int compareTo(Expense otherExpense) {

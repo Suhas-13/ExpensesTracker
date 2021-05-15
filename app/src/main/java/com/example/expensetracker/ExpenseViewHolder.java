@@ -13,6 +13,7 @@ public class ExpenseViewHolder  {
     public TextView categoryView;
     public TextView dateView;
     public TextView notesView;
-
-
+    /*
+    class used to hold all the textviews in the expenses rows. will be created/modified by ExpensesAdapter
+     */
 }

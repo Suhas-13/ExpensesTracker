@@ -31,6 +31,9 @@ public class ExpenseSheet {
     public TreeMap<Double, ArrayList<Expense> > priceMap;
     public TreeSet<Expense> sortedExpenses;
 
+    /*
+    constructor of new expensesheet, creates new maps and treeset.
+     */
     public ExpenseSheet() {
         this.nameMap = new HashMap<String, ArrayList<Expense> >();
         this.categoryMap = new HashMap<String, ArrayList<Expense> >();
@@ -40,6 +43,9 @@ public class ExpenseSheet {
         this.priceMap = new TreeMap<Double, ArrayList<Expense> >();
         this.sortedExpenses = new TreeSet<Expense>();
     }
+    /*
+    expense sheet constructor taking in arraylist of expenses and then using addExpense to populate
+     */
     public ExpenseSheet(ArrayList<Expense> expenseList) {
         this.nameMap = new HashMap<String, ArrayList<Expense> >();
         this.categoryMap = new HashMap<String, ArrayList<Expense> >();
@@ -52,6 +58,9 @@ public class ExpenseSheet {
             addExpense(e);
         }
     }
+    /*
+    checks whether expense key is present in each map and then adds to the arraylist corresponding to each key, then adds to treeset
+     */
     public boolean addExpense(Expense expense) {
         if (nameMap.containsKey(expense.getName())) {
             nameMap.get(expense.getName()).add(expense);
@@ -108,6 +117,9 @@ public class ExpenseSheet {
         sortedExpenses.add(expense);
         return true;
     }
+    /*
+    based on given characteristic, will mutate the input searchlist to include all expenseobjects associated with the given characteristic + partialExpense search object
+     */
     public void searchHelper(Expense partialExpense, HashMap<Expense, Integer> searchList, String characteristic) {
         HashMap<?, ArrayList<Expense>> queryList;
         ArrayList<Expense> expenseList;
@@ -150,6 +162,9 @@ public class ExpenseSheet {
         }
 
     }
+    /*
+    searches treemap of price by range using the submap method to get objects within a paritcular range only. returns these objects to searchHelper
+     */
     public ArrayList<Expense> searchByRange(Range priceRange) {
         NavigableMap<Double, ArrayList<Expense>> withinRange = priceMap.subMap(priceRange.getPriceLow(), true, priceRange.getPriceHigh(), true);
         ArrayList<Expense> output = new ArrayList<Expense>();
@@ -158,6 +173,9 @@ public class ExpenseSheet {
         }
         return output;
     }
+    /*
+    finds fields present in partialExpense and then calls the searchHelper with each one. finally goes through output set and finds expenses that occur enough times to be returned as output. i.e if an expense object is found in 5 searches and 5 criterias are provided then it is returned in the treeset.
+     */
     public TreeSet<Expense> multiSearch(Expense partialExpense) {
         int numCriteria = 0;
         HashMap<Expense, Integer> searchList = new HashMap<Expense, Integer>();
@@ -193,7 +211,9 @@ public class ExpenseSheet {
         }
         return output;
     }
-
+    /*
+    simply checks whether each map/set contains the expense and then calls the remove method of the arraylist in each map. removes from the treeset as well.
+     */
     public boolean removeExpense(Expense expense) {
         if (expense == null) {
             return false;

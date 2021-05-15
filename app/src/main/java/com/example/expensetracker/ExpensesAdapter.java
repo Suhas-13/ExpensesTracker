@@ -27,30 +27,50 @@ public class ExpensesAdapter extends BaseAdapter {
     private Context expenseContext;
     private ExpenseViewHolder holder;
     private boolean showSearchResults;
+    /*
+    defines a new expense adapter using context/expense list
+     */
     public ExpensesAdapter(Context context, TreeSet<Expense> expenseList) {
         this.mInflater = LayoutInflater.from(context);
         this.mExpenses = expenseList;
         this.expenseContext = context;
         this.showSearchResults = false;
     }
+    /*
+    deletes an expense from search results
+     */
     public void deleteFromSearchTree(Expense deleteExpense) {
         mSearchResults.remove(deleteExpense);
     }
+    /*
+    returns whether currently showing search results only
+     */
     public boolean isShowSearchResults() {
         return showSearchResults;
     }
 
+    /*
+    sets search results to given treeet
+     */
     public void setSearchResults(TreeSet<Expense> expenses) {
         this.mSearchResults = expenses;
     }
-
+    /*
+    sets expenses object to given treeset
+     */
     public void setExpenses(TreeSet<Expense> expenses) {
         this.mExpenses = expenses;
     }
+    /*
+    sets whether search results are showing or not
+     */
     public void setShowSearchResults(boolean showSearchResults) {
         this.showSearchResults = showSearchResults;
     }
 
+    /*
+    overrided size method that returns size of search results or expenses.
+     */
     @Override
     public int getCount() {
         if (showSearchResults) {
@@ -59,6 +79,9 @@ public class ExpensesAdapter extends BaseAdapter {
         return mExpenses.size();
     }
 
+    /*
+    overrideded method to return expense associated at an index using iteration of set.
+     */
     @Override
     public Object getItem(int i) {
         int j = 0;
@@ -85,11 +108,17 @@ public class ExpensesAdapter extends BaseAdapter {
         return currentExpense;
     }
 
+    /*
+    necessary overrided method, id is just the index
+     */
     @Override
     public long getItemId(int i) {
         return i;
     }
 
+    /*
+    overrided method to create expenseviewholder and return it with fields populated
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {

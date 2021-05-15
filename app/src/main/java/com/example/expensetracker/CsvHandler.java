@@ -32,7 +32,9 @@ import java.time.format.DateTimeFormatter;
 
 public class CsvHandler {
 
-
+    /*
+     The export csv method takes in a filename and an expense sheet. It then checks that appropriate permissions are present(and asks for them if not), then once permissions is given it uses csvwriter to export as csv from the treeset stored in expenseSheet.
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static void exportCsv(ExpenseSheet expenseSheet, String fileName) throws IOException {
         try {
@@ -81,6 +83,9 @@ public class CsvHandler {
             Toast.makeText(MainActivity.mainContext, "Error importing csv, please check format.",Toast.LENGTH_LONG).show();
         }
     }
+    /*
+    The importCsv method takes in a filename and then generates a full file path based on the given file name. It then queries for storage permissions and once given uses a CsvReader to read in the csv and generates an ExpenseSheet object that is returned. To generate the expenseSheet it calls addExpense on each new Expense object to ensure all the maps in ExpenseSheet are properly updated.
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static ExpenseSheet importCsv(String fileName) throws IOException, ParseException {
         try {

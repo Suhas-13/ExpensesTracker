@@ -7,6 +7,9 @@ package com.example.expensetracker;
 public class Range {
     private double priceLow;
     private double priceHigh;
+    /*
+    a constructor to initalize a range object with a low price and high price.
+     */
     public Range(double priceLow, double priceHigh) {
         this.priceLow = priceLow;
         this.priceHigh = priceHigh;

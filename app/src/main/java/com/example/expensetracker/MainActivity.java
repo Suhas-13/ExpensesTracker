@@ -69,11 +69,16 @@ public class MainActivity extends AppCompatActivity {
     final Calendar myCalendar = Calendar.getInstance();
     private OperationsStack currentOperationStack;
     private SharedPreferences.Editor mEditor;
-
+    /*
+    tells adapter that dataset has changed and to reload the view.
+     */
     public void refreshAdapter() {
         this.adapter.notifyDataSetChanged();
     }
 
+    /*
+    loads a new expense sheaet based on given expense sheet. updates adapter and tells it to refresh as well. also saves data to local storage.
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void loadExpenseSheet(ExpenseSheet newExpenses) {
         this.expenses = newExpenses;
@@ -86,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
 
+    /*
+    overrided on intent result, will call exportSheet or importSheet after permissions are granted.
+     */
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
@@ -114,6 +122,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    main entry point into application, creates the main view and also checks whether anything is stored to application storage, if so it will load it as an expense sheet using Gson and SharedPreferences
+    also initializes operationstack, currentactivity and sets up the listview onclick methods(highlighting when clicked).
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
         this.currentActivity = this;
         this.mainContext = getApplicationContext();
         mPrefs = getPreferences(MODE_PRIVATE);
-
         GsonBuilder builder = new GsonBuilder().registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
             @Override
             public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
@@ -131,8 +142,6 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.enableComplexMapKeySerialization();
         currentOperationStack = new OperationsStack();
-
-
         mEditor = mPrefs.edit();
 
         Gson gson = builder.create();
@@ -167,15 +176,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /*
+    creates a new blank expense sheet on click and saves
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void newSheetClick(View view) {
         loadExpenseSheet(new ExpenseSheet());
         saveData();
     }
+    /*
+    calls operation stacks undo and then refreshes
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void undoButtonClick(View view) {
         currentOperationStack.performUndo();
         refreshAdapter();
+        saveData();
     }
+    /*
+    overrides when file picker intent is done running, will call importcsv with the given file name.
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -215,22 +235,36 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+    /*
+    creates an intent to allow a user to choose a file to import
+     */
     public void importSheetClick(View view) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
         startActivityForResult(Intent.createChooser(intent, "Choose CSV File"), 123);
     }
+    /*
+    calls csv handler exportsv method with given expenses. name includes date and random integer to prevent overwriting
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void exportSheetClick(View view) throws IOException {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDateTime currentDate = LocalDateTime.now();
         CsvHandler.exportCsv(expenses, "expenses" + dtf.format(currentDate).toString() +"-" + (int) (Math.random() * 1000));
     }
+    /*
+    calls redo method of operation stack, updates adapter and saves data.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void redoButtonClick(View view) {
         currentOperationStack.performRedo();
         refreshAdapter();
+        saveData();
     }
+    /*
+    hides the selector once clicked of the listview
+     */
     public void hideListViewSelector() {
         expensesView.getSelector().setAlpha(0);
     }
@@ -252,6 +286,9 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+    /*
+    saves data to local storage using gson and sharedpreferences
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void saveData() {
 
@@ -267,10 +304,12 @@ public class MainActivity extends AppCompatActivity {
         builder.enableComplexMapKeySerialization();
         Gson gson = builder.create();
         String json = gson.toJson(expenses, ExpenseSheet.class);
-        Log.d("TEST",json);
         mEditor.putString("storedSheet", json);
         mEditor.commit();
     }
+    /*
+    disables keyboard popup for text input
+     */
     public static void disableSoftInputFromAppearing(EditText editText) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { // API 21
             editText.setShowSoftInputOnFocus(false);
@@ -278,10 +317,16 @@ public class MainActivity extends AppCompatActivity {
             editText.setTextIsSelectable(true);
         }
     }
+    /*
+    ensures date follows standard format
+     */
     public String padDate(int number)
     {
         return number<=9?"0"+number:String.valueOf(number);
     }
+    /*
+    creates popup asking for expense information before calling addexpense and updating adapters/data.
+     */
     public void addExpenseButtonClick(View view) {
 
         // inflate the layout of the popup window
@@ -360,6 +405,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    /*
+    opens data analysis view and creates onclick for each function. calling static methods in data analysis as appropriate
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void setupExpenseAnalysisData(LinearLayout dataList, LayoutInflater inflater, String mainText, boolean averagesMode) {
         dataList.removeAllViews();
@@ -396,7 +444,9 @@ public class MainActivity extends AppCompatActivity {
             dataList.addView(currencyView);
         }
     }
-
+    /*
+    button click of data analysis, calls the setupAnalysisData and defines views. also checks if outlier button is hidden and changes the text appropriately
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void openDataAnalysis(View view) {
         // inflate the layout of the popup window
@@ -460,14 +510,13 @@ public class MainActivity extends AppCompatActivity {
                 popupWindow.dismiss();
             }
         });
-
-
         // show the popup window
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
-
-
     }
 
+    /*
+    this method is called when the search button is clicked. it opens up the search view and sets up all the new click listeners. when the form is submitted it calls the multisearch method and shows the search results.
+     */
     public void searchButtonClick(View view) {
 
         // inflate the layout of the popup window
