@@ -18,7 +18,8 @@ public class DataAnalysis {
             HashMap<String, Double> currencyList = new HashMap<String, Double>();
             HashMap<String, Double> currencyNum = new HashMap<String, Double>();
             for (Expense expense: expenses.categoryMap.get(category)) {
-                currencyList.put(expense.getCurrency(), currencyList.getOrDefault(expense.getCurrency(), 0.0) + expense.getPrice());
+                currencyList.put(expense.getCurrency(), currencyList.getOrDefault(expense.getCurrency(), 0.0) +
+                        expense.getPrice());
                 currencyNum.put(expense.getCurrency(), currencyNum.getOrDefault(expense.getCurrency(), 0.0) + 1);
             }
             for (Expense expense: expenses.categoryMap.get(category)) {
@@ -38,7 +39,8 @@ public class DataAnalysis {
         HashMap<String, Double> currencyTotals = new HashMap<String, Double>();
         for (String currency: expenses.currencyMap.keySet()) {
             for (Expense expense: expenses.currencyMap.get(currency)) {
-                currencyTotals.put(expense.getCurrency(), currencyTotals.getOrDefault(expense.getCurrency(), 0.0) + expense.getPrice());
+                currencyTotals.put(expense.getCurrency(), currencyTotals.getOrDefault(expense.getCurrency(), 0.0) +
+                        expense.getPrice());
             }
         }
         return currencyTotals;
@@ -51,7 +53,8 @@ public class DataAnalysis {
         HashMap<String, Double> currencyAverages = new HashMap<String, Double>();
         for (String currency: expenses.currencyMap.keySet()) {
             for (Expense expense: expenses.currencyMap.get(currency)) {
-                currencyTotals.put(expense.getCurrency(), currencyTotals.getOrDefault(expense.getCurrency(), 0.0) + expense.getPrice());
+                currencyTotals.put(expense.getCurrency(), currencyTotals.getOrDefault(expense.getCurrency(), 0.0) +
+                        expense.getPrice());
                 currencyCounts.put(expense.getCurrency(), currencyCounts.getOrDefault(expense.getCurrency(), 0) + 1);
             }
         }

@@ -43,7 +43,6 @@ public class CsvHandler {
             String filePath = baseDir + File.separator + "expenseSheets/" + fileName;
             File directory = new File(Environment.getExternalStorageDirectory() + File.separator + "expenseSheets");
             directory.mkdirs();
-            Log.d("TEST", filePath);
             String[] headerRecord = {"Name", "Category", "Price", "Currency", "Date", "Location", "Notes"};
             boolean hasPermission = (ContextCompat.checkSelfPermission(MainActivity.mainContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
             if (!hasPermission) {
@@ -51,8 +50,6 @@ public class CsvHandler {
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         112);
             } else {
-
-
                 FileWriter mFileWriter = new FileWriter(filePath);
                 CSVWriter csvWriter = new CSVWriter(mFileWriter,
                         CSVWriter.DEFAULT_SEPARATOR,

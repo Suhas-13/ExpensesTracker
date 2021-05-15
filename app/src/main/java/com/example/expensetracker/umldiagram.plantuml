@@ -1,0 +1,203 @@
+@startuml
+
+title __EXPENSETRACKER's Class Diagram__\n
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.CsvHandler {
+        {static} + exportCsv()
+        {static} + importCsv()
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.DataAnalysis {
+        {static} - OUTLIER_VARIANCE : Integer
+        {static} + calculateAverages()
+        {static} + calculateTotal()
+        {static} + findOutliers()
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.Expense {
+        - category : String
+        - currency : String
+        - date : LocalDate
+        - location : String
+        - name : String
+        - notes : String
+        - price : Double
+        - randomId : int
+        + Expense()
+        + Expense()
+        + compareTo()
+        + getCategory()
+        + getCharacteristic()
+        + getCurrency()
+        + getDate()
+        + getLocation()
+        + getName()
+        + getNotes()
+        + getPrice()
+        + getPriceRange()
+        + setCategory()
+        + setCurrency()
+        + setDate()
+        + setLocation()
+        + setName()
+        + setNotes()
+        + setPrice()
+        + setPriceRange()
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.ExpenseSheet {
+        + categoryMap : HashMap<String, ArrayList<Expense>>
+        + currencyMap : HashMap<String, ArrayList<Expense>>
+        + dateMap : HashMap<LocalDate, ArrayList<Expense>>
+        + locationMap : HashMap<String, ArrayList<Expense>>
+        + nameMap : HashMap<String, ArrayList<Expense>>
+        + priceMap : TreeMap<Double, ArrayList<Expense>>
+        + sortedExpenses : TreeSet<Expense>
+        + ExpenseSheet()
+        + ExpenseSheet()
+        + addExpense()
+        + multiSearch()
+        + removeExpense()
+        + searchByRange()
+        + searchHelper()
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.ExpenseViewHolder {
+        + categoryView : TextView
+        + currencyView : TextView
+        + dateView : TextView
+        + locationView : TextView
+        + nameView : TextView
+        + notesView : TextView
+        + priceView : TextView
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.ExpensesAdapter {
+        - expenseContext : Context
+        - mExpenses : TreeSet<Expense>
+        - mInflater : LayoutInflater
+        - mSearchResults : TreeSet<Expense>
+        - showSearchResults : boolean
+        - holder : ExpenseViewHolder
+        + ExpensesAdapter()
+        + deleteFromSearchTree()
+        + getCount()
+        + getItem()
+        + getItemId()
+        + getView()
+        + isShowSearchResults()
+        + setExpenses()
+        + setSearchResults()
+        + setShowSearchResults()
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.MainActivity {
+        {static} + currentActivity : Activity
+        {static} + expenses : ExpenseSheet
+        {static} + mainContext : Context
+        ~ myCalendar : Calendar
+        - expensesView : ListView
+        - mEditor : Editor
+        - mPrefs : SharedPreferences
+        - selectedPosition : int
+        + addExpenseButtonClick()
+        + deleteExpenseButtonClick()
+        {static} + disableSoftInputFromAppearing()
+        + exportSheetClick()
+        + hideListViewSelector()
+        + importSheetClick()
+        + loadExpenseSheet()
+        + newSheetClick()
+        + onRequestPermissionsResult()
+        + openDataAnalysis()
+        + padDate()
+        + redoButtonClick()
+        + refreshAdapter()
+        + saveData()
+        + searchButtonClick()
+        + setupExpenseAnalysisData()
+        + undoButtonClick()
+        # onActivityResult()
+        # onCreate()
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.Operation {
+        {static} + ADD_OPERATION : int
+        {static} + REMOVE_OPERATION : int
+        - operationType : int
+        - operationExpense : Expense
+        + Operation()
+        + getOperationExpense()
+        + getOperationType()
+        + setOperationExpense()
+        + setOperationType()
+        + toggleOperationType()
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.OperationsStack {
+        - redoOperations : Stack<Operation>
+        - undoOperations : Stack<Operation>
+        + OperationsStack()
+        + addExpense()
+        + performRedo()
+        + performUndo()
+        + removeExpense()
+    }
+  }
+
+
+  namespace com.example.expensetracker {
+    class com.example.expensetracker.Range {
+        - priceHigh : double
+        - priceLow : double
+        + Range()
+        + getPriceHigh()
+        + getPriceLow()
+        + setPriceHigh()
+        + setPriceLow()
+    }
+  }
+
+
+  com.example.expensetracker.Expense .up.|> java.lang.Comparable
+  com.example.expensetracker.Expense o-- com.example.expensetracker.Range : priceRange
+  com.example.expensetracker.ExpensesAdapter -up-|> android.widget.BaseAdapter
+  com.example.expensetracker.MainActivity -up-|> androidx.appcompat.app.AppCompatActivity
+  com.example.expensetracker.MainActivity o-- com.example.expensetracker.ExpensesAdapter : adapter
+  com.example.expensetracker.MainActivity o-- com.example.expensetracker.OperationsStack : currentOperationStack
+  com.example.expensetracker.Operation o-- com.example.expensetracker.Expense : operationExpense
+  com.example.expensetracker.CsvHandler *-- com.example.expensetracker.MainActivity
+  com.example.expensetracker.OperationsStack o-- com.example.expensetracker.Operation
+  com.example.expensetracker.MainActivity o-- com.example.expensetracker.ExpenseSheet
+  com.example.expensetracker.DataAnalysis *-- com.example.expensetracker.MainActivity
+  com.example.expensetracker.ExpensesAdapter o-- com.example.expensetracker.ExpenseViewHolder
+right footer
+
+
+
+@enduml

@@ -25,6 +25,7 @@ public class ExpensesAdapter extends BaseAdapter {
     private TreeSet<Expense> mSearchResults;
     private LayoutInflater mInflater;
     private Context expenseContext;
+    private ExpenseViewHolder holder;
     private boolean showSearchResults;
     public ExpensesAdapter(Context context, TreeSet<Expense> expenseList) {
         this.mInflater = LayoutInflater.from(context);
@@ -92,7 +93,7 @@ public class ExpensesAdapter extends BaseAdapter {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        ExpenseViewHolder holder;
+
 
         if (view == null) {
             LayoutInflater recordInflater = (LayoutInflater)

@@ -96,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         exportSheetClick(null);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Toast.makeText(this, "Error outputting csv.", Toast.LENGTH_LONG).show();
+
                     }
                 } else {
                     Toast.makeText(this, "The app was not allowed to write to your storage. Hence, it cannot function properly. Please consider granting it this permission", Toast.LENGTH_LONG).show();
