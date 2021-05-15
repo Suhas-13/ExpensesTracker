@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -51,6 +53,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
@@ -63,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     public static Context mainContext;
     private ExpensesAdapter adapter;
     private SharedPreferences mPrefs;
+    final Calendar myCalendar = Calendar.getInstance();
     private OperationsStack currentOperationStack;
     private SharedPreferences.Editor mEditor;
 
@@ -266,6 +270,17 @@ public class MainActivity extends AppCompatActivity {
         mEditor.putString("storedSheet", json);
         mEditor.commit();
     }
+    public static void disableSoftInputFromAppearing(EditText editText) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { // API 21
+            editText.setShowSoftInputOnFocus(false);
+        } else { // API 11-20
+            editText.setTextIsSelectable(true);
+        }
+    }
+    public String padDate(int number)
+    {
+        return number<=9?"0"+number:String.valueOf(number);
+    }
     public void addExpenseButtonClick(View view) {
 
         // inflate the layout of the popup window
@@ -287,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText categoryText =  popupView.findViewById(R.id.categoryField);
         final EditText dateText =  popupView.findViewById(R.id.dateField);
         final EditText notesText =  popupView.findViewById(R.id.notesField);
+        disableSoftInputFromAppearing(dateText);
         final Button submit =  popupView.findViewById(R.id.addExpenseButton);
         closePopup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -294,7 +310,24 @@ public class MainActivity extends AppCompatActivity {
                 popupWindow.dismiss();
             }
         });
-
+        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                dateText.setText(padDate(dayOfMonth) + "/" + padDate(monthOfYear+1) + "/" + padDate(year));
+            }
+        };
+        dateText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(MainActivity.this, date, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
         submit.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -315,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 catch (Exception e) {
-                    Log.d("ERROR", String.valueOf(e));
+                    Toast.makeText(getApplicationContext(), "Please ensure all fields are filled out. The notes field is not required though.", Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -466,8 +499,26 @@ public class MainActivity extends AppCompatActivity {
         final EditText currencyText =  popupView.findViewById(R.id.currencyField);
         final EditText categoryText =  popupView.findViewById(R.id.categoryField);
         final EditText dateText =  popupView.findViewById(R.id.dateField);
+        disableSoftInputFromAppearing(dateText);
         final Button submit =  popupView.findViewById(R.id.searchExpenseButton);
-
+        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                dateText.setText(padDate(dayOfMonth) + "/" + padDate(monthOfYear+1) + "/" + padDate(year));
+            }
+        };
+        dateText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(MainActivity.this, date, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
         closePopup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

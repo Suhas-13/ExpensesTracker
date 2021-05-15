@@ -35,22 +35,23 @@ public class CsvHandler {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static void exportCsv(ExpenseSheet expenseSheet, String fileName) throws IOException {
-        if (!(fileName.substring(Math.max(0,fileName.length()-4)).equals(".csv"))) {
-            fileName = fileName + ".csv";
-        }
-        String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
-        String filePath = baseDir + File.separator + "expenseSheets/" + fileName;
-        File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"expenseSheets");
-        directory.mkdirs();
-        Log.d("TEST",filePath);
-        String[] headerRecord = {"Name", "Category", "Price", "Currency", "Date", "Location", "Notes"};
-        boolean hasPermission = (ContextCompat.checkSelfPermission(MainActivity.mainContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
-        if (!hasPermission) {
-            ActivityCompat.requestPermissions(MainActivity.currentActivity,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    112);
-        } else {
-            try {
+        try {
+            if (!(fileName.substring(Math.max(0, fileName.length() - 4)).equals(".csv"))) {
+                fileName = fileName + ".csv";
+            }
+            String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+            String filePath = baseDir + File.separator + "expenseSheets/" + fileName;
+            File directory = new File(Environment.getExternalStorageDirectory() + File.separator + "expenseSheets");
+            directory.mkdirs();
+            Log.d("TEST", filePath);
+            String[] headerRecord = {"Name", "Category", "Price", "Currency", "Date", "Location", "Notes"};
+            boolean hasPermission = (ContextCompat.checkSelfPermission(MainActivity.mainContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+            if (!hasPermission) {
+                ActivityCompat.requestPermissions(MainActivity.currentActivity,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        112);
+            } else {
+
 
                 FileWriter mFileWriter = new FileWriter(filePath);
                 CSVWriter csvWriter = new CSVWriter(mFileWriter,
@@ -78,30 +79,35 @@ public class CsvHandler {
                     MainActivity.currentActivity.startActivity(Intent.createChooser(intentShareFile, "Share File"));
                 }
             }
-            catch (Exception e) {
-                Toast.makeText(MainActivity.mainContext, "Error importing csv, please check format.",Toast.LENGTH_LONG).show();
-            }
+        }
+        catch (Exception e) {
+            Toast.makeText(MainActivity.mainContext, "Error importing csv, please check format.",Toast.LENGTH_LONG).show();
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static ExpenseSheet importCsv(String fileName) throws IOException, ParseException {
-        ExpenseSheet expenseSheet = new ExpenseSheet();
-        boolean hasPermission = (ContextCompat.checkSelfPermission(MainActivity.mainContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
-        if (!hasPermission) {
-            ActivityCompat.requestPermissions(MainActivity.currentActivity,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    142);
-        } else {
-            FileReader fr = new FileReader(new File(Environment.getExternalStorageDirectory()+File.separator + fileName.substring(8)));
-            CSVReader reader = new CSVReader(fr, ',', '\'', 1);
-            String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
-                Expense currentExpense = new Expense(nextLine[0], nextLine[4], Double.parseDouble(nextLine[2]), nextLine[5], nextLine[3], nextLine[1], nextLine[6]);
-                expenseSheet.addExpense(currentExpense);
+        try {
+            ExpenseSheet expenseSheet = new ExpenseSheet();
+            boolean hasPermission = (ContextCompat.checkSelfPermission(MainActivity.mainContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+            if (!hasPermission) {
+                ActivityCompat.requestPermissions(MainActivity.currentActivity,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        142);
+            } else {
+                FileReader fr = new FileReader(new File(Environment.getExternalStorageDirectory() + File.separator + fileName.substring(8)));
+                CSVReader reader = new CSVReader(fr, ',', '\'', 1);
+                String[] nextLine;
+                while ((nextLine = reader.readNext()) != null) {
+                    Expense currentExpense = new Expense(nextLine[0], nextLine[4], Double.parseDouble(nextLine[2]), nextLine[5], nextLine[3], nextLine[1], nextLine[6]);
+                    expenseSheet.addExpense(currentExpense);
+                }
             }
+            Toast.makeText(MainActivity.mainContext, "Imported csv.", Toast.LENGTH_LONG).show();
+            return expenseSheet;
+        } catch (Exception exception) {
+            Toast.makeText(MainActivity.mainContext, "Error importing csv. Please check the format.", Toast.LENGTH_LONG).show();
+            return new ExpenseSheet();
         }
-        Toast.makeText(MainActivity.mainContext, "Imported csv.",Toast.LENGTH_LONG).show();
-        return expenseSheet;
     }
 
 }
