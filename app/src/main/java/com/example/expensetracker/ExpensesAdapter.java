@@ -148,7 +148,6 @@ public class ExpensesAdapter extends BaseAdapter {
         holder.categoryView.setText(expense.getCategory());
         holder.currencyView.setText(expense.getCurrency());
         holder.locationView.setText(expense.getLocation());
-        Log.d("TEST", "here ");
         return view;
     }
 

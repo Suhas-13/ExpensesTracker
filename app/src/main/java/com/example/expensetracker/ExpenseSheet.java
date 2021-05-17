@@ -205,6 +205,7 @@ public class ExpenseSheet {
         }
         TreeSet<Expense> output = new TreeSet<Expense>();
         for (Expense expense: searchList.keySet()) {
+            Log.d("TEST", String.valueOf(expense.getName()) + searchList.get(expense));
             if (searchList.get(expense) == numCriteria) {
                 output.add(expense);
             }

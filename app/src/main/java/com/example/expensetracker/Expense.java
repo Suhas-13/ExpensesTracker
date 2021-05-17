@@ -1,5 +1,6 @@
 package com.example.expensetracker;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -61,7 +62,20 @@ public class Expense implements Comparable<Expense> {
         this.name = name;
         this.price = price;
         if (!date.isEmpty()) {
-            this.date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            try {
+                String[] date_split = date.split("/", 0);
+                if (date_split.length == 3 && date_split[1].length() == 1) {
+                    date_split[1] = "0" + date_split[1];
+                    date = String.join("/",date_split);
+                    Log.d("TEST",date);`
+
+                }
+                this.date = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            }
+            catch(Exception e) {
+                throw new ParseException("Error parsing date", 0);
+            }
+
         }
         else {
             this.date = null;
@@ -200,20 +214,29 @@ public class Expense implements Comparable<Expense> {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int compareTo(Expense otherExpense) {
-        if (otherExpense.name.equalsIgnoreCase(name)) {
-            if (otherExpense.date.equals(date)) {
-                if (otherExpense.location.equalsIgnoreCase(location)) {
-                    if (otherExpense.price == price) {
-                        return randomId - otherExpense.randomId;
+        if (otherExpense.category.equalsIgnoreCase(category)) {
+            if (otherExpense.name.equalsIgnoreCase(name)) {
+                if (otherExpense.price == price) {
+                    if (otherExpense.currency.equalsIgnoreCase(currency)) {
+                        if (otherExpense.date == date) {
+                            if (otherExpense.location.equalsIgnoreCase(location)) {
+                                return randomId - otherExpense.randomId;
+                            }
+                            return location.compareToIgnoreCase(otherExpense.location);
+                        }
+                        return date.compareTo(otherExpense.date);
                     }
-                    return (int) (price-otherExpense.price);
+                    return currency.compareToIgnoreCase(otherExpense.currency);
                 }
-                return location.compareToIgnoreCase(otherExpense.location);
+                return (int) (price - otherExpense.price);
             }
-            return date.compareTo(otherExpense.date);
+            return name.compareToIgnoreCase(otherExpense.name);
         }
-        return name.compareToIgnoreCase(otherExpense.name);
+        return category.compareToIgnoreCase(otherExpense.category);
+
     }
+
+
 
 
 

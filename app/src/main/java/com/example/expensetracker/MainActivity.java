@@ -148,12 +148,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (mPrefs.contains("storedSheet")) {
             String json = mPrefs.getString("storedSheet", "");
-            Log.d("TEST",json);
             try {
                 expenses = gson.fromJson(json, ExpenseSheet.class);
             }
             catch(Exception e) {
-                Log.d("TEST",e.toString());
                 expenses = new ExpenseSheet();
             }
 
@@ -387,6 +385,10 @@ public class MainActivity extends AppCompatActivity {
                     String date = dateText.getText().toString();
                     String notes = notesText.getText().toString();
                     Expense newExpense = new Expense(name, date, price, location, currency, category, notes);
+                    if (name == null || name.isEmpty() || date == null || location == null || location.isEmpty() || currency == null || currency.isEmpty() || category == null || category.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), "Please ensure all fields are filled out. The notes field is not required though.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     currentOperationStack.addExpense(newExpense);
                     adapter.notifyDataSetChanged();
                     saveData();
@@ -486,7 +488,6 @@ public class MainActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                Log.d("TEST","CLICKED");
                 setupExpenseAnalysisData(dataList, inflater, "Total Expenditure", false);
             }
         });
